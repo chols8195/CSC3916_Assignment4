@@ -3,12 +3,11 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const passport = require('passport');
-const authJwtController = require('./auth_jwt');
+const authJwtController = require('./auth_jwt'); // You're not using authController, consider removing it
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const User = require('./Users');
-const Movie = require('./Movies');
-const Review = require('./Reviews');
+const Movie = require('./Movies'); // You're not using Movie, consider removing it
 
 const app = express();
 app.use(cors());
@@ -22,6 +21,8 @@ mongoose.connect(process.env.DB)
   .catch(err => console.error('MongoDB connection error:', err))
 
 const router = express.Router();
+
+// Removed getJSONObjectForMovieRequirement as it's not used
 
 router.post('/signup', async (req, res) => { // Use async/await
   if (!req.body.username || !req.body.password || !req.body.email) {
@@ -194,43 +195,6 @@ router.route('/movies/:title')
     res.status(405).json({ success: false, message: 'POST method not allowed on /movies/:title. Use /movies instead' });
   });
 
-router.route('/reviews')
-  .get(authJwtController.isAuthenticated, async (req, res) => {
-    try {
-      const reviews = await Review.find({}).populate('movieId', 'title');
-      res.status(200).json({ success: true, reviews });
-    }
-    catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, message: 'Error fetching reviews'});
-    }
-  })
-  .post(authJwtController.isAuthenticated, async (req, res) => {
-    try{
-      const { movieId, username, review, rating } = req.body;
-
-      // Validate required fields 
-      if (!movieId || !username || !review || rating === undefined) {
-        return res.status(400).json({ success: false, message: 'moveId, username, review, and rating are required'});
-      }
-
-      // Check if movie exists 
-      const movie = await Movie.findById(movieId);
-      if (!movie) {
-        return res.status(404).json({ success: false, message: 'Movie not found'});
-      }
-
-      const newReview = new Review({ movieId, username, review, rating });
-      await newReview.save();
-
-      res.status(201).json({ message: 'Review created!' });
-    }
-    catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, message: 'Error creating review', error: err.message});
-    }
-  });
-
 // Root route
 router.get('/', (req, res) => {
   res.json({
@@ -244,10 +208,6 @@ router.get('/', (req, res) => {
         create: 'POST /movies',
         update: 'PUT /movies/:title',
         delete: 'DELETE /movies/:title'
-      },
-      reviews: {
-        getAll: 'GET /reviews',
-        create: 'POST /reviews'
       }
     }
   });
