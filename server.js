@@ -9,6 +9,7 @@ const cors = require('cors');
 const User = require('./Users');
 const Movie = require('./Movies');
 const Review = require('./Reviews');
+const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,48 @@ mongoose.connect(process.env.DB)
   .catch(err => console.error('MongoDB connection error:', err))
 
 const router = express.Router();
+
+async function trackEvent(movieTitle, genre) {
+  const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID;
+  const GA_API_SECRET = process.env.GA_API_SECRET;
+
+  if (!GA_MEASUREMENT_ID || !GA_API_SECRET) {
+    console.log('Google Analytics not configured');
+    return;
+  }
+
+  const clientId = crypto.randomBytes(16).toString('hex');
+
+  const payload = {
+    client_id = clientId,
+    events: [{
+      name: 'movie_review',
+      params: {
+        movie_name: movieTitle,
+        genre: genre,
+        event_category: genre, 
+        event_action: 'POST /reviews',
+        event_label: 'API Request for Movie Review',
+        value: 1
+      }
+    }]
+  };
+
+  try {
+    const response = await fetch(
+      `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
+      {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'application/json' }
+      }
+    );
+    console.log('Analytics event sent for:', movieTitle);
+  } catch (err) {
+    console.error('Analytics error:', error);
+  }
+  
+}
 
 router.post('/signup', async (req, res) => { // Use async/await
   if (!req.body.username || !req.body.password || !req.body.email) {
@@ -222,6 +265,9 @@ router.route('/reviews')
 
       const newReview = new Review({ movieId, username, review, rating });
       await newReview.save();
+
+      // Track event in Google Analytics 
+      trackEvent(movie.title, movie.genre);
 
       res.status(201).json({ message: 'Review created!' });
     }
