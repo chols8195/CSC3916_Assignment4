@@ -1,11 +1,23 @@
-# CSC3916 Assignment 3 - Movies API
+# CSC3916 Assignment 4 - Movies API with Reviews
 
-A RESTful API built with Node.js, Express, and MongoDB for managing movies with JWT authentication.
+A RESTful API built with Node.js, Express, and MongoDB for managing movies and reviews with JWT authentication and Google Analytics tracking.
 
-## Deployed URLs
+## Deployed URL
 
-- **API:** https://lisacho-csc3916-movies-api.onrender.com
-- **React Frontend:** https://lisacho-csc3916-react.onrender.com
+- **API:** https://csc3916-assignment4-fbqo.onrender.com
+
+## Installation
+
+1. Clone the repository
+2. Run `npm install`
+3. Create a `.env` file with:
+```
+   DB=your_mongodb_connection_string
+   SECRET_KEY=your_jwt_secret
+   GA_MEASUREMENT_ID=your_google_analytics_id
+   GA_API_SECRET=your_google_analytics_secret
+```
+4. Run `node server.js`
 
 ## API Endpoints
 
@@ -14,15 +26,45 @@ A RESTful API built with Node.js, Express, and MongoDB for managing movies with 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/signup` | Create a new user (name, username, email, password) |
-| POST | `/signin` | Login with username or email |
+| POST | `/signin` | Login and get JWT token |
 
-### Movies (All require JWT authentication)
+### Movies
 
-| Route | GET | POST | PUT | DELETE |
-|-------|-----|------|-----|--------|
-| `/movies` | Return all movies | Save a single movie | FAIL | FAIL |
-| `/movies/:title` | Return specific movie | FAIL | Update specific movie | Delete specific movie |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/movies` | Get all movies |
+| GET | `/movies/:title` | Get a specific movie |
+| GET | `/movies/:title?reviews=true` | Get movie with all reviews |
+| POST | `/movies` | Create a movie |
+| PUT | `/movies/:title` | Update a movie |
+| DELETE | `/movies/:title` | Delete a movie |
+
+### Reviews
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/reviews` | Get all reviews |
+| POST | `/reviews` | Create a review |
+
+## Review Schema
+```javascript
+{
+  movieId: ObjectId (reference to Movie),
+  username: String,
+  review: String,
+  rating: Number (0-5)
+}
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DB` | MongoDB connection string |
+| `SECRET_KEY` | JWT secret key |
+| `GA_MEASUREMENT_ID` | Google Analytics Measurement ID |
+| `GA_API_SECRET` | Google Analytics API Secret |
 
 ## Postman Collection
 
-[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/41547135-93216f23-d5ed-4bf9-9b53-39df3fcb863b?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D41547135-93216f23-d5ed-4bf9-9b53-39df3fcb863b%26entityType%3Dcollection%26workspaceId%3D3e7cea0b-9a30-4ea3-82f9-47cf84cc6f0d#?env%5BCho%20-%20HW3%5D=W3sia2V5IjoidXJsIiwidmFsdWUiOiJodHRwczovL2xpc2FjaG8tY3NjMzkxNi1tb3ZpZXMtYXBpLm9ucmVuZGVyLmNvbSIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJkZWZhdWx0Iiwic2Vzc2lvblZhbHVlIjoiaHR0cHM6Ly9saXNhY2hvLWNzYzM5MTYtbW92aWVzLWFwaS5vbnJlbmRlci5jb20iLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6Imh0dHBzOi8vbGlzYWNoby1jc2MzOTE2LW1vdmllcy1hcGkub25yZW5kZXIuY29tIiwic2Vzc2lvbkluZGV4IjowfSx7ImtleSI6InRlc3RfdXNlcm5hbWUiLCJ2YWx1ZSI6InVzZXJfbXd4YWNrbGoiLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoiYW55Iiwic2Vzc2lvblZhbHVlIjoidXNlcl9td3hhY2tsaiIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoidXNlcl9td3hhY2tsaiIsInNlc3Npb25JbmRleCI6MX0seyJrZXkiOiJ0ZXN0X2VtYWlsIiwidmFsdWUiOiJ1c2VyX213eGFja2xqQHRlc3QuY29tIiwiZW5hYmxlZCI6dHJ1ZSwidHlwZSI6ImFueSIsInNlc3Npb25WYWx1ZSI6InVzZXJfbXd4YWNrbGpAdGVzdC5jb20iLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6InVzZXJfbXd4YWNrbGpAdGVzdC5jb20iLCJzZXNzaW9uSW5kZXgiOjJ9LHsia2V5IjoidGVzdF9wYXNzd29yZCIsInZhbHVlIjoicGFzc3dvcmQxMjMiLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoiYW55Iiwic2Vzc2lvblZhbHVlIjoicGFzc3dvcmQxMjMiLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6InBhc3N3b3JkMTIzIiwic2Vzc2lvbkluZGV4IjozfSx7ImtleSI6Imp3dF90b2tlbiIsInZhbHVlIjoiSldUIGV5SmhiR2NpT2lKSVV6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUpwWkNJNklqWTVPVFJpTXpCbFkyWXhOalF5TmpObU9XSmtZVGhsWXlJc0luVnpaWEp1WVcxbElqb2lkWE5sY2w5dGQzaGhZMnRzYWlJc0ltbGhkQ0k2TVRjM01UTTFNekV3TVN3aVpYaHdJam94TnpjeE16VTJOekF4ZlEuencycUM4WXF5V1RDTFdBclctUDJSd0VEVGd4dldxMTIzYWlMSVhMd24wZyIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJhbnkiLCJzZXNzaW9uVmFsdWUiOiJKV1QuLi4iLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6IkpXVCBleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKcFpDSTZJalk1T1RSaU16QmxZMll4TmpReU5qTm1PV0prWVRobFl5SXNJblZ6WlhKdVlXMWxJam9pZFhObGNsOXRkM2hoWTJ0c2FpSXNJbWxoZENJNk1UYzNNVE0xTXpFd01Td2laWGh3SWpveE56Y3hNelUyTnpBeGZRLnp3MnFDOFlxeVdUQ0xXQXJXLVAyUndFRFRneHZXcTEyM2FpTElYTHduMGciLCJzZXNzaW9uSW5kZXgiOjR9XQ==)
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/41547135-c0ed9a64-4ce5-4ea0-a1de-3b4fbaaee498?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D41547135-c0ed9a64-4ce5-4ea0-a1de-3b4fbaaee498%26entityType%3Dcollection%26workspaceId%3D7ca8359f-ca27-4671-bea7-1a0170606de5#?env%5BCho%20-%20HW4%5D=W3sia2V5IjoidXJsIiwidmFsdWUiOiJodHRwczovL2NzYzM5MTYtYXNzaWdubWVudDQtZmJxby5vbnJlbmRlci5jb20iLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoiZGVmYXVsdCIsInNlc3Npb25WYWx1ZSI6Imh0dHBzOi8vY3NjMzkxNi1hc3NpZ25tZW50NC1mYnFvLm9ucmVuZGVyLmNvbSIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoiaHR0cHM6Ly9jc2MzOTE2LWFzc2lnbm1lbnQ0LWZicW8ub25yZW5kZXIuY29tIiwic2Vzc2lvbkluZGV4IjowfV0=)
