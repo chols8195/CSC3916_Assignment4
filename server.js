@@ -36,7 +36,7 @@ async function trackEvent(movieTitle, genre) {
   const clientId = crypto.randomBytes(16).toString('hex');
 
   const payload = {
-    client_id = clientId,
+    client_id: clientId,
     events: [{
       name: 'movie_review',
       params: {
