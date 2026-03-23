@@ -182,9 +182,30 @@ router.route('/movies/:title')
   .get(authJwtController.isAuthenticated, async (req, res) => {
     try {
       const movie = await Movie.findOne({ title: req.params.title });
+      
       if (!movie) {
         return res.status(404).json({ success: false, message: 'Movie not found' });
       }
+
+      // Check if reviews=true query parameter is passed
+      if (req.query.reviews === 'true') {
+        const movieWithReviews = await Movie.aggregate([
+          {
+            $match: { title: req.params.title }
+          },
+          {
+            $lookup: {
+              from: 'reviews',
+              localField: '_id',
+              foreignField: 'movieId',
+              as: 'reviews'
+            }
+          }
+        ]);
+
+        return res.status(200).json({ success: true, movie: movieWithReviews[0] });
+      }
+
       res.status(200).json({ success: true, movie });
     }
     catch (err) {
