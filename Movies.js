@@ -55,6 +55,7 @@ const MovieSchema = new Schema({
     },
     required: true
   },
+  imageUrl: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Movie', MovieSchema);

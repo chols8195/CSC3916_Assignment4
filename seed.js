@@ -11,7 +11,8 @@ const seedMovies = [
             { actorName: 'Song Kang-ho', characterName: 'Kim Ki-taek' },
             { actorName: 'Choi Woo-shik', characterName: 'Kim Ki-woo' },
             { actorName: 'Park So-dam', characterName: 'Kim Ki-jung' }
-        ]
+        ],
+        imageUrl: 'https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg'
     },
     {
         title: 'Train to Busan',
@@ -21,7 +22,8 @@ const seedMovies = [
             { actorName: 'Gong Yoo', characterName: 'Seok-woo' },
             { actorName: 'Ma Dong-seok', characterName: 'Sang-hwa' },
             { actorName: 'Jung Yu-mi', characterName: 'Sung-kyung' }
-        ]
+        ],
+        imageUrl: 'https://image.tmdb.org/t/p/w500/6CjuBdUMFxntGybLpxqiVyXRm4g.jpg'
     },
     {
         title: 'Your Name',
@@ -31,7 +33,8 @@ const seedMovies = [
             { actorName: 'Ryunosuke Kamiki', characterName: 'Taki Tachibana' },
             { actorName: 'Mone Kamishiraishi', characterName: 'Mitsuha Miyamizu' },
             { actorName: 'Masami Nagasawa', characterName: 'Miki Okudera' }
-        ]
+        ],
+        imageUrl: 'https://image.tmdb.org/t/p/w500/q719jXXEzOoYaps6babgKnONONX.jpg'
     },
     {
         title: 'Crazy Rich Asians',
@@ -41,7 +44,8 @@ const seedMovies = [
             { actorName: 'Constance Wu', characterName: 'Rachel Chu' },
             { actorName: 'Henry Golding', characterName: 'Nick Young' },
             { actorName: 'Michelle Yeoh', characterName: 'Eleanor Young' }
-        ]
+        ],
+        imageUrl: 'https://image.tmdb.org/t/p/w500/1XxL4LJ5WHdrcYcihEZUCgNCpAW.jpg'
     },
     {
         title: 'Spider-Man: Across the Spider-Verse',
@@ -51,7 +55,8 @@ const seedMovies = [
             { actorName: 'Shameik Moore', characterName: 'Miles Morales' },
             { actorName: 'Hailee Steinfeld', characterName: 'Gwen Stacy' },
             { actorName: 'Oscar Isaac', characterName: 'Miguel O\'Hara' }
-        ]
+        ],
+        imageUrl: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg'
     }
 ];
 

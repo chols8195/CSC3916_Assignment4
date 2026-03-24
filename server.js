@@ -122,60 +122,106 @@ router.post('/signin', async (req, res) => { // Use async/await
 });
 
 router.route('/movies')
-    .get(authJwtController.isAuthenticated, async (req, res) => {
-      try {
-        const movies = await Movie.find({});
-        res.status(200).json({ success: true, movies });
+  .get(authJwtController.isAuthenticated, async (req, res) => {
+    try {
+      // Check if reviews=true query parameter
+      if (req.query.reviews === 'true') {
+        const moviesWithReviews = await Movie.aggregate([
+            {
+                $lookup: {
+                    from: 'reviews',
+                    localField: '_id',
+                    foreignField: 'movieId',
+                    as: 'reviews'
+                }
+            },
+            {
+                $addFields: {
+                    avgRating: { $avg: '$reviews.rating' }
+                }
+            },
+            {
+                $sort: { avgRating: -1 }
+            }
+        ]);
+        return res.status(200).json({ success: true, movies: moviesWithReviews });
       }
-      catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Error fetching movies'});
-      }
-    })
-    .post(authJwtController.isAuthenticated, async (req, res) => {
-      try {
-        const { title, releaseDate, genre, actors } = req.body;
 
-        // Validate required fields 
-        if (!title) {
-          return res.status(400).json({ success: false, message: 'Title is required'});
-        }
-        if (!releaseDate) {
-          return res.status(400).json({ success: false, message: 'Release date is required'});
-        }
-        if (!genre) {
-          return res.status(400).json({ success: false, message: 'Genre is required'});
-        }
-        if (!actors || actors.length < 3) {
-          return res.status(400).json({ success: false, message: 'At least 3 actors are required'});
-        }
-
-        // Validate each actor has required fields 
-        for (let i = 0; i < actors.length; i++) {
-          if (!actors[i].actorName || !actors[i].characterName) {
-            return res.status(400).json({
-              success: false, 
-              message: `Actor ${i + 1} must have both actorName and characterName`
-            });
+      // Without reviews, still sort by average rating
+      const movies = await Movie.aggregate([
+        {
+          $lookup: {
+              from: 'reviews',
+              localField: '_id',
+              foreignField: 'movieId',
+              as: 'reviewsData'
+          }
+        },
+        {
+          $addFields: {
+              avgRating: { $avg: '$reviewsData.rating' }
+          }
+        },
+        {
+          $sort: { avgRating: -1 }
+        },
+        {
+          $project: {
+              reviewsData: 0
           }
         }
+      ]);
+      res.status(200).json({ success: true, movies });
+    }
+    catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: 'Error fetching movies'});
+    }
+  })
+  .post(authJwtController.isAuthenticated, async (req, res) => {
+    try {
+      const { title, releaseDate, genre, actors } = req.body;
 
-        const movie = new Movie({ title, releaseDate, genre, actors });
-        await movie.save();
+      // Validate required fields 
+      if (!title) {
+        return res.status(400).json({ success: false, message: 'Title is required'});
+      }
+      if (!releaseDate) {
+        return res.status(400).json({ success: false, message: 'Release date is required'});
+      }
+      if (!genre) {
+        return res.status(400).json({ success: false, message: 'Genre is required'});
+      }
+      if (!actors || actors.length < 3) {
+        return res.status(400).json({ success: false, message: 'At least 3 actors are required'});
+      }
 
-        res.status(201).json({ success: true, message: 'Movie saved successfully', movie });
+      // Validate each actor has required fields 
+      for (let i = 0; i < actors.length; i++) {
+        if (!actors[i].actorName || !actors[i].characterName) {
+          return res.status(400).json({
+            success: false, 
+            message: `Actor ${i + 1} must have both actorName and characterName`
+          });
+        }
       }
-      catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Error saving movie', error: err.message });
-      }
-    })
-    .put((req, res) => {
-      res.status(405).json({ success: false, message: 'PUT method not allowed on /movies. Use /movies/:title instead'});
-    })
-    .delete((req, res) => {
-      res.status(405).json({ success: false, message: 'DELETE method not allowed on /movies. Use /movies/:title instead' });
-    });
+
+      const movie = new Movie({ title, releaseDate, genre, actors });
+      await movie.save();
+
+      res.status(201).json({ success: true, message: 'Movie saved successfully', movie });
+    }
+    catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: 'Error saving movie', error: err.message });
+    }
+  })
+  .put((req, res) => {
+    res.status(405).json({ success: false, message: 'PUT method not allowed on /movies. Use /movies/:title instead'});
+  })
+  .delete((req, res) => {
+    res.status(405).json({ success: false, message: 'DELETE method not allowed on /movies. Use /movies/:title instead' });
+  });
 
 // GET, PUT, DELETE for specific movie title 
 router.route('/movies/:title')
@@ -199,6 +245,11 @@ router.route('/movies/:title')
               localField: '_id',
               foreignField: 'movieId',
               as: 'reviews'
+            }
+          },
+          {
+            $addFields: {
+              avgRating: { $avg: '$reviews.rating' }
             }
           }
         ]);
